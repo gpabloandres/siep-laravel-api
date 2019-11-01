@@ -23,8 +23,8 @@ RUN ls -al /var/www/html/storage
 RUN chmod 777 /var/www/html/storage -R
 RUN composer install --ignore-platform-reqs
 
-RUN wget https://api.github.com/repos/MaTiUs77/LaravelApi/commits/master && mv master /var/www/html/public/master.json
-RUN wget https://api.github.com/repos/MaTiUs77/LaravelApi/commits/developer && mv developer /var/www/html/public/developer.json
+RUN wget https://api.github.com/repos/decyt-tdf/siep-laravel-api/commits/master && mv master /var/www/html/public/master.json
+RUN wget https://api.github.com/repos/decyt-tdf/siep-laravel-api/commits/developer && mv developer /var/www/html/public/developer.json
 
 # Modifica todo los permisos
 RUN chown -R www-data:www-data /var/www/html

@@ -38,6 +38,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->mapApiRoutes();
         $this->mapApiPublicRoutes();
+        $this->mapApiJwtRoutes();
         $this->mapWebRoutes();
         //$this->customWebRoutes();
     }
@@ -56,6 +57,20 @@ class RouteServiceProvider extends ServiceProvider
              ->group(base_path('routes/web.php'));
     }
 
+    protected function mapApiJwtRoutes()
+    {
+        $files = Finder::create()
+            ->in(app_path('Http/Controllers/Api'))
+            ->name('jwt.php');
+
+        foreach($files as $file) {
+            Route::prefix('api/jwt')
+                ->middleware(['api','jwt'])
+                ->namespace($this->namespace)
+                ->group($file->getRealPath());
+        }
+    }
+
     protected function mapApiPublicRoutes()
     {
         $files = Finder::create()
@@ -69,13 +84,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->group($file->getRealPath());
         }
     }
-    /**
-     * Define the "api" routes for the application.
-     *
-     * These routes are typically stateless.
-     *
-     * @return void
-     */
+
     protected function mapApiRoutes()
     {
         $files = Finder::create()

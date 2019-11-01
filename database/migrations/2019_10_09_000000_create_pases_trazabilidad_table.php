@@ -24,6 +24,7 @@ class CreatePasesTrazabilidadTable extends Migration
             $table->string('pase_nro')->nullable(); // Legajo concatenado XXXXX/0000
             $table->integer('inscripcion_id'); // Origen
             $table->integer('centro_id'); // Origen
+            $table->integer('ciclo_id'); // Origen
 
             // Luego de confirmar y genegar la inscripcion por pase en destino
             $table->integer('centro_id_destino')->nullable(); // Destino
