@@ -318,6 +318,7 @@ class MatriculasPorSeccion extends Controller
         $status= Input::get('status');
         $hermano= Input::get('hermano');
         $tipo = Input::get('tipo');
+        $vacantes = Input::get('vacantes');
 
         // Por defecto Curso.status = 1
         if(isset($status)) {
@@ -386,6 +387,17 @@ class MatriculasPorSeccion extends Controller
             }
         }
 
+        if(isset($vacantes)) {
+            switch ($vacantes) {
+                case 'con':
+                    $query->havingRaw('(cursos.plazas - COUNT(inscripcions.id)) > 0');
+                    break;
+                case 'sin':
+                    $query->havingRaw('(cursos.plazas - COUNT(inscripcions.id)) < 1');
+                    break;
+            }
+        }
+
         return $query;
     }   
 
@@ -393,6 +405,7 @@ class MatriculasPorSeccion extends Controller
         $orderBy = [
             'centros.nombre' => 'asc',
             'cursos.anio' => 'asc',
+            'cursos.turno' => 'asc',
             'cursos.division' => 'asc'
         ];
 
