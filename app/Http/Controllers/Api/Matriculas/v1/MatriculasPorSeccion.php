@@ -31,7 +31,8 @@ class MatriculasPorSeccion extends Controller
             'anio' => $anio_rule,
             'division' => 'string',
             'sector' => 'string',
-            'status' => 'string'
+            'status' => 'string',
+            'turno' => 'string',
         ];
 
         // Se validan los parametros
@@ -318,6 +319,8 @@ class MatriculasPorSeccion extends Controller
         $status= Input::get('status');
         $hermano= Input::get('hermano');
         $tipo = Input::get('tipo');
+        $vacantes = Input::get('vacantes');
+        $turno = Input::get('turno');
 
         // Por defecto Curso.status = 1
         if(isset($status)) {
@@ -375,6 +378,9 @@ class MatriculasPorSeccion extends Controller
         if(isset($tipo)) {
             $query = $query->whereArr('cursos.tipo',$tipo);
         }
+        if(isset($turno)) {
+            $query = $query->where('cursos.turno',$turno);
+        }
 
         if(isset($division)) {
             if($division=='vacia' || $division=='sin' || $division == null) {
@@ -386,6 +392,17 @@ class MatriculasPorSeccion extends Controller
             }
         }
 
+        if(isset($vacantes)) {
+            switch ($vacantes) {
+                case 'con':
+                    $query->havingRaw('(cursos.plazas - COUNT(inscripcions.id)) > 0');
+                    break;
+                case 'sin':
+                    $query->havingRaw('(cursos.plazas - COUNT(inscripcions.id)) < 1');
+                    break;
+            }
+        }
+
         return $query;
     }   
 
@@ -393,6 +410,7 @@ class MatriculasPorSeccion extends Controller
         $orderBy = [
             'centros.nombre' => 'asc',
             'cursos.anio' => 'asc',
+            'cursos.turno' => 'asc',
             'cursos.division' => 'asc'
         ];
 

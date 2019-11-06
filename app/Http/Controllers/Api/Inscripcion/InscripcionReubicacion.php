@@ -18,6 +18,7 @@ class InscripcionReubicacion extends Controller
         'user_id' => 'required|numeric',
         'curso_id' => 'required|numeric',
         'curso_id_to' => 'required|numeric',
+        'ciclo' => 'required|numeric',
     ];
 
     public function start(Request $request)
@@ -33,7 +34,7 @@ class InscripcionReubicacion extends Controller
 
         $cursoFrom=  Cursos::where('id',$request->get('curso_id'))->first();
         $cursoTo=  Cursos::where('id',$request->get('curso_id_to'))->first();
-        $cicloActual = Ciclos::where('nombre',Carbon::now()->year)->first();
+        $ciclo = Ciclos::where('nombre',$request->get('ciclo'))->first();
 
         // Solo se permite reubicar cursos del mismo año
         //if($cursoFrom->anio == $cursoTo->anio)
@@ -45,7 +46,7 @@ class InscripcionReubicacion extends Controller
                 $curins->save();
 
                 // Se realiza la cuantificacion en matricula y vacantes de ambos cursos
-                $this->cuantificarInscripcion($cursoFrom,$cursoTo,$cicloActual);
+                $this->cuantificarInscripcion($cursoFrom,$cursoTo,$ciclo);
 
                 $success[] = $curins->Inscripcion->id;
             }
@@ -67,9 +68,9 @@ class InscripcionReubicacion extends Controller
         return $output;
     }
 
-    private function cuantificarInscripcion(Cursos $cursoFrom, Cursos $cursoTo, Ciclos $cicloActual) {
+    private function cuantificarInscripcion(Cursos $cursoFrom, Cursos $cursoTo, Ciclos $ciclo) {
         $fromMatriculasCount = CursosInscripcions::where('curso_id',$cursoFrom->id)
-            ->filtrarCiclo($cicloActual->id)
+            ->filtrarCicloNombre($ciclo->nombre)
             ->count();
 
         $cursoFrom->matricula = $fromMatriculasCount;
@@ -77,7 +78,7 @@ class InscripcionReubicacion extends Controller
         $cursoFrom->save();
 
         $toMatriculasCount = CursosInscripcions::where('curso_id',$cursoTo->id)
-            ->filtrarCiclo($cicloActual->id)
+            ->filtrarCicloNombre($ciclo->nombre)
             ->count();
 
         $cursoTo->matricula = $toMatriculasCount;

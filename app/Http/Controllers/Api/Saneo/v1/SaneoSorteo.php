@@ -13,7 +13,7 @@ class SaneoSorteo extends Controller
         //$this->middleware('jwt');
     }
 
-    public function start($ciclo,$nivel_servicio)
+    public function start($ciclo,$nivel_servicio,$nro_sorteo=1)
     {
         // Consume API lista de inscripciones
         $params = [
@@ -34,7 +34,7 @@ class SaneoSorteo extends Controller
             // Transforma los datos a collection para realizar un mapeo
             $data = collect($response['data']);
 
-            $formatted = $data->map(function($item){
+            $formatted = $data->map(function($item) use($nro_sorteo) {
                 $inscripcion = $item['inscripcion'];
 
                 $inscripcion_id = $inscripcion['id'];
@@ -45,7 +45,7 @@ class SaneoSorteo extends Controller
 
                 $new = [
                     'estado_inscripcion' => 'BAJA',
-                    'legajo_nro' => $inscripcion['legajo_nro'].'-SINVACANTE_1',
+                    'legajo_nro' => $inscripcion['legajo_nro'].'-SINVACANTE_'.$nro_sorteo,
                 ];
 
                 $fix = Inscripcions::find($inscripcion_id);
