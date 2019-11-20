@@ -106,6 +106,7 @@ class PromocionStore extends Controller
                     $promocion->promocionado = null; // Deprecar
                     $promocion->promocion_id = null;
                     $promocion->repitencia_id = null;
+                    $promocion->egreso_id = null;
 
                     $promocion->created = $today;
                     $promocion->modified = $today;

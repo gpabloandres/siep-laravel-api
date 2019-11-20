@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\Api\Saneo\SaneoRepitencia;
+use App\Http\Controllers\Api\Saneo\v1\SaneoRepitencia;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
