@@ -15,30 +15,21 @@ class SaneoRepitencia extends Controller
 
     private $cicloActual = null;
     private $cicloAnterior= null;
+    private $cicloSiguiente= null;
 
     public function start($ciclo=2019,$page=1,$por_pagina=10)
     {
-        if(request('page')) {
-            $page = request('page');
-        }
-
-        if(request('por_pagina')) {
-            $por_pagina = request('por_pagina');
-        }
-
-        $cicloActual = $ciclo;
-        $cicloAnterior= $ciclo - 1;
-
-        $this->cicloActual = Ciclos::where('nombre',$cicloActual)->first();
-        $this->cicloAnterior = Ciclos::where('nombre',$cicloAnterior)->first();
+        $this->cicloActual = Ciclos::where('nombre',$ciclo)->first();
+        $this->cicloAnterior = Ciclos::where('nombre',($ciclo-1))->first();
+        $this->cicloSiguiente= Ciclos::where('nombre',($ciclo+1))->first();
 
         $params = [
             'ciclo' => $ciclo,
             'division' => 'con',
-            'estado_inscripcion' => 'CONFIRMADA',
-            'nivel_servicio' => ['Comun - Primario','Comun - Secundario'],
             'promocion' => 'sin',
             'repitencia' => 'sin',
+            'estado_inscripcion' => 'CONFIRMADA',
+            'nivel_servicio' => ['Comun - Primario','Comun - Secundario'],
             'with' => 'inscripcion.curso,inscripcion.centro',
 
             'por_pagina' => $por_pagina,
@@ -56,17 +47,16 @@ class SaneoRepitencia extends Controller
         if($api->hasError()) { return $api->getError(); }
         $response= $api->response();
 
-        Log::info("SaneoRepitencia:doSaneo()");
-        $this->doSaneo($response);
-        $response['data'] = RepitenciaResource::collection(collect($response['data']));
-        Log::info("SaneoRepitencia:Finalizado page: ".$page." last_page: ".$response['last_page']);
-        return $response;
-    }
-
-    public function doSaneo($apiResponse) {
-        foreach ($apiResponse['data'] as $item) {
+        // Recorre resultados, y sanea si es requerido
+        foreach ($response['data'] as $item) {
             $this->sanearInscripcion($item);
         }
+
+        // Devuelve resultados de saneo
+        $response['data'] = RepitenciaResource::collection(collect($response['data']));
+
+        Log::info("SaneoRepitencia:Finalizado page: ".$page." last_page: ".$response['last_page']);
+        return $response;
     }
 
     public function sanearInscripcion($item)
@@ -76,11 +66,12 @@ class SaneoRepitencia extends Controller
         $alumno= $inscripcion['alumno'];
         $persona=  collect($alumno['persona']);
 
-        $anterior = null;
+        // Informacion de inscripcion
         $actual = [
             'trazabilidad' => [
                 'repitencia_id' => $inscripcion['repitencia_id'],
                 'promocion_id' => $inscripcion['promocion_id'],
+                'egreso_id' => $inscripcion['egreso_id']
             ],
 
             'ciclo_id' => $inscripcion['ciclo_id'],
@@ -89,11 +80,13 @@ class SaneoRepitencia extends Controller
             'alumno_id' => $alumno['id'],
             'legajo_nro' => $inscripcion['legajo_nro'],
             'estado_inscripcion' => $inscripcion['estado_inscripcion'],
-            'curso' => $curso->only(['id','tipo','anio','division','turno']),
+            'curso' => $curso->only(['id','tipo','anio','division','turno'])
         ];
 
-        // Obtiene datos de la inscripcion anterior
-        $anterior= $this->obtenerInscripcionAnterior($inscripcion,$persona);
+        // Obtiene informacion de inscripcion anterior
+        $anterior = $this->obtenerInscripcionAnterior($inscripcion,$persona);
+
+        dd($actual,$anterior);
 
         // Sanea la DB, establece la relacion entre la inscripcion actual y verifica si la
         // inscripcion anterior fue una repitencia o una promocion
@@ -155,6 +148,7 @@ class SaneoRepitencia extends Controller
             'trazabilidad' => [
                 'repitencia_id' => $inscripcionAnterior['repitencia_id'],
                 'promocion_id' => $inscripcionAnterior['promocion_id'],
+                'egreso_id' => $inscripcionAnterior['egreso_id']
             ],
 
             'inscripciones_found' => $inscripcionesFound,
