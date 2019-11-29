@@ -50,7 +50,7 @@
                         @endif
                     </td>
                     <td>
-                        <div style="text-align:right; line-height: 150px; font-size: 11px">“2019 – AÑO DEL CENTENARIO DEL NACIMIENTO DE EVA DUARTE DE PERÓN”</div>
+                        <div style="text-align:right; line-height: 150px; font-size: 10px">“2019 – AÑO DEL CENTENARIO DEL NACIMIENTO DE EVA DUARTE DE PERÓN”</div>
                     </td>
                 </tr>
             </table>
@@ -88,6 +88,10 @@
 
                 , división <b>{{ $curso->division }}</b>
                 del servicio y nivel <b>{{ $centro->nivel_servicio }}</b>
+
+                @if ($inscripcion->tipo_inscripcion == 'Estudiante de Intercambio')
+                    (inscripción tipo: <b>{{ $inscripcion->tipo_inscripcion }}</b>)
+                @endif
             </p>
 
             @if(!empty($inscripcion->observaciones))
