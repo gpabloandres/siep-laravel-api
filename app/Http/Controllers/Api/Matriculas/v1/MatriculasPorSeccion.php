@@ -157,25 +157,32 @@ class MatriculasPorSeccion extends Controller
                 case 'Común - Inicial':
                 case 'Común - Primario':
                     // Plazas por defecto
-                    $item->plazas = 22;
+                    $item->plazas = 24;
 
                     // CENTRO_ID: 3   --> JARDIN DE INFANTES Nº 2 - EL BARQUITO TRAVIESO
                     // CURSO_ID: 2492  --> Sala de 4 años VIOLETA Mañana
                     // CURSO_ID: 2493 --> Sala de 4 años VIOLETA Tarde
+                    /*
                     if($item->curso_id==2492 || $item->curso_id==2493) {
                         $item->plazas = 18;
                     }
-
+                    */
                     // CENTRO_ID: 173 --> ESCUELA PROVINCIAL Nº 40 - MARIA ELENA WALSH
+                    /*
                     if($item->centro_id==173) {
                         $item->plazas = 12;
                     }
-
+                    */
                     // CENTRO_ID: 10 --> ESCUELA PROVINCIAL Nº 13 - ALMIRANTE GUILLERMO BROWN
+                    /*
                     if($item->centro_id==10) {
                         $item->plazas = 24;
                     }
-
+                    */
+                    // CENTRO_ID: 124 --> ESCUELA PROVINCIAL Nº 35 - JORGE LUIS BORGES
+                    if($item->centro_id==124) {
+                        $item->plazas = 22;
+                    }
                     // Recuento de vacantes
                     $item->vacantes= $item->plazas - $item->matriculas;
                     break;
@@ -312,6 +319,7 @@ class MatriculasPorSeccion extends Controller
         $ciclo = Input::get('ciclo');
         $ciudad = Input::get('ciudad');
         $ciudad_id = Input::get('ciudad_id');
+        $nombre = Input::get('nombre');
         $centro_id = Input::get('centro_id');
         $curso_id = Input::get('curso_id');
         $anio = Input::get('anio');
@@ -366,7 +374,10 @@ class MatriculasPorSeccion extends Controller
         if(!empty($hermano)) {
             $query = $query->where('inscripcions.hermano_id','<>',null);
         }
-        if(!empty($sector)) {
+        if(isset($nombre)) {
+            $query = $query->where('centros.nombre',$nombre);
+        }
+        if(isset($sector)) {
             $query = $query->where('centros.sector',$sector);
         }
         if(!empty($nivel_servicio)) {
