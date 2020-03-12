@@ -26,12 +26,17 @@ class MatriculasPorSeccion extends Controller
             'ciudad' => 'string',
             'ciudad_id' => 'numeric',
             'centro_id' => 'numeric',
-            'nivel_servicio' => $nivel_servicio_rule,
-            'estado_inscripcion' => $estado_inscripcion_rule,
+            'curso_id' => 'numeric',
             'anio' => $anio_rule,
             'division' => 'string',
+            'nivel_servicio' => $nivel_servicio_rule,
+            'estado_inscripcion' => $estado_inscripcion_rule,
             'sector' => 'string',
-            'status' => 'string'
+            'status' => 'string',
+            'turno' => 'string',
+            'hermano' => 'string',
+            'tipo' => 'string',
+            'vacantes' => 'string',
         ];
 
         // Se validan los parametros
@@ -75,6 +80,7 @@ class MatriculasPorSeccion extends Controller
             COUNT(inscripcions.hermano_id) as por_hermano,
             COUNT(inscripcions.promocion_id) as promociones,
             COUNT(inscripcions.repitencia_id) as repitencias,
+            COUNT(inscripcions.egreso_id) as egresos,
             cursos.observaciones,
             CAST(SUM(if(inscripcions.estado_inscripcion  = "CONFIRMADA", 1, 0)) AS UNSIGNED) AS confirmadas
             ')
@@ -151,25 +157,34 @@ class MatriculasPorSeccion extends Controller
                 case 'Común - Inicial':
                 case 'Común - Primario':
                     // Plazas por defecto
-                    $item->plazas = 22;
+                    $item->plazas = 24;
 
                     // CENTRO_ID: 3   --> JARDIN DE INFANTES Nº 2 - EL BARQUITO TRAVIESO
                     // CURSO_ID: 2492  --> Sala de 4 años VIOLETA Mañana
                     // CURSO_ID: 2493 --> Sala de 4 años VIOLETA Tarde
+                    /*
                     if($item->curso_id==2492 || $item->curso_id==2493) {
                         $item->plazas = 18;
                     }
-
+                    */
                     // CENTRO_ID: 173 --> ESCUELA PROVINCIAL Nº 40 - MARIA ELENA WALSH
                     if($item->centro_id==173) {
                         $item->plazas = 12;
                     }
-
                     // CENTRO_ID: 10 --> ESCUELA PROVINCIAL Nº 13 - ALMIRANTE GUILLERMO BROWN
+                    /*
                     if($item->centro_id==10) {
                         $item->plazas = 24;
                     }
-
+                    */
+                    // CENTRO_ID: 124 --> ESCUELA PROVINCIAL Nº 35 - JORGE LUIS BORGES
+                    if($item->centro_id==124) {
+                        if($item->curso_id==2217 || $item->curso_id==3967 || $item->curso_id==2219 || $item->curso_id==2220 || $item->curso_id==2221 || $item->curso_id==3280 || $item->curso_id==2223 || $item->curso_id==2224 || $item->curso_id==3998 || $item->curso_id==2226 || $item->curso_id==2227 || $item->curso_id==2228) {
+                            $item->plazas = 18;
+                        } else {
+                        $item->plazas = 22;
+                        }
+                    }
                     // Recuento de vacantes
                     $item->vacantes= $item->plazas - $item->matriculas;
                     break;
@@ -243,10 +258,9 @@ class MatriculasPorSeccion extends Controller
                 'Por Hermano'
                 ];
             if($report_type){
+                array_push($content[0],'Promociones');
                 if($report_type == "repitencias"){
                     array_push($content[0],'Repitencias');
-                }else if($report_type == "promociones"){
-                    array_push($content[0],'Promociones');
                 }
             }else{
                 array_push($content[0],'Observaciones');
@@ -273,17 +287,16 @@ class MatriculasPorSeccion extends Controller
                         $item->por_hermano
                     ];
                     if($report_type){
+                        if(count($content) > 0){
+                            array_push($content[count($content) - 1],$item->promociones);
+                        }else{
+                            array_push($content,$item->promociones);
+                        }
                         if($report_type == 'repitencias'){
                             if(count($content) > 0){
                                 array_push($content[count($content) - 1],$item->repitencias);
                             }else{
                                 array_push($content,$item->repitencias);
-                            }
-                        }else if($report_type == 'promociones'){
-                            if(count($content) > 0){
-                                array_push($content[count($content) - 1],$item->promociones);
-                            }else{
-                                array_push($content,$item->promociones);
                             }
                         }
                     }else{
@@ -308,6 +321,7 @@ class MatriculasPorSeccion extends Controller
         $ciclo = Input::get('ciclo');
         $ciudad = Input::get('ciudad');
         $ciudad_id = Input::get('ciudad_id');
+        $nombre = Input::get('nombre');
         $centro_id = Input::get('centro_id');
         $curso_id = Input::get('curso_id');
         $anio = Input::get('anio');
@@ -319,9 +333,10 @@ class MatriculasPorSeccion extends Controller
         $hermano= Input::get('hermano');
         $tipo = Input::get('tipo');
         $vacantes = Input::get('vacantes');
+        $turno = Input::get('turno');
 
         // Por defecto Curso.status = 1
-        if(isset($status)) {
+        if(!empty($status)) {
             if(is_numeric($status)) {
                 $query = $query->where('cursos.status',$status);
             }
@@ -330,7 +345,7 @@ class MatriculasPorSeccion extends Controller
         }
 
         // Por defecto se listan las inscripciones confirmadas
-        if(isset($estado_inscripcion)) {
+        if(!empty($estado_inscripcion)) {
             if(is_array($estado_inscripcion))
             {
                 $query = $query->where(function($subquery)
@@ -346,38 +361,44 @@ class MatriculasPorSeccion extends Controller
         }
 
         // Aplicacion de filtros
-        if(isset($ciclo)) {
+        if(!empty($ciclo)) {
             $query = $query->where('ciclos.nombre',$ciclo);
         }
-        if(isset($ciudad)) {
+        if(!empty($ciudad)) {
             $query = $query->where('ciudads.nombre',$ciudad);
         }
-        if(isset($ciudad_id)) {
+        if(!empty($ciudad_id)) {
             $query = $query->where('ciudads.id',$ciudad_id);
         }
-        if(isset($centro_id)) {
+        if(!empty($centro_id)) {
             $query = $query->where('inscripcions.centro_id',$centro_id);
         }
-        if(isset($hermano)) {
+        if(!empty($hermano)) {
             $query = $query->where('inscripcions.hermano_id','<>',null);
+        }
+        if(isset($nombre)) {
+            $query = $query->where('centros.nombre',$nombre);
         }
         if(isset($sector)) {
             $query = $query->where('centros.sector',$sector);
         }
-        if(isset($nivel_servicio)) {
+        if(!empty($nivel_servicio)) {
             $query = $query->whereArr('centros.nivel_servicio',$nivel_servicio);
         }
-        if(isset($curso_id)) {
+        if(!empty($curso_id)) {
             $query = $query->where('cursos.id',$curso_id);
         }
-        if(isset($anio)) {
+        if(!empty($anio)) {
             $query = $query->whereArr('cursos.anio',$anio);
         }
-        if(isset($tipo)) {
+        if(!empty($tipo)) {
             $query = $query->whereArr('cursos.tipo',$tipo);
         }
+        if(!empty($turno)) {
+            $query = $query->where('cursos.turno',$turno);
+        }
 
-        if(isset($division)) {
+        if(!empty($division)) {
             if($division=='vacia' || $division=='sin' || $division == null) {
                 $query = $query->where('cursos.division','');
             } else if($division=='con'){
@@ -387,7 +408,7 @@ class MatriculasPorSeccion extends Controller
             }
         }
 
-        if(isset($vacantes)) {
+        if(!empty($vacantes)) {
             switch ($vacantes) {
                 case 'con':
                     $query->havingRaw('(cursos.plazas - COUNT(inscripcions.id)) > 0');

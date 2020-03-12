@@ -29,12 +29,16 @@
             </td>
             <td>
                 <h2 style="text-align: right">INSCRIPCIÓN NÚMERO | {{ $inscripcion->legajo_nro }}</h2>
-                <div style="text-align: right; font-size: 12px">“2019 – AÑO DEL CENTENARIO DEL NACIMIENTO DE EVA DUARTE DE PERÓN”</div>
+                <div style="text-align: right; font-size: 12px">“2020 - Año del General Manuel Belgrano”</div>
             </td>
         </tr>
     </table>
     <br>
-    <h3>CONSTANCIA DE INSCRIPCIÓN | Estado: {{ $inscripcion->estado_inscripcion }}</h3>
+    @if ($inscripcion->tipo_inscripcion == 'Estudiante de Intercambio')
+        <h3>CONSTANCIA DE INSCRIPCIÓN | Estado: {{ $inscripcion->estado_inscripcion }} | {{ $inscripcion->tipo_inscripcion }}</h3>
+    @else
+        <h3>CONSTANCIA DE INSCRIPCIÓN | Estado: {{ $inscripcion->estado_inscripcion }}</h3>
+    @endif
     <p>
         @if(isset($centro->nivel_servicio) && $centro->nivel_servicio=='Común - Inicial' && $centro->nivel_servicio=='Común - Primario')
             La Supervisión Técnica de Supervisión Escolar,
