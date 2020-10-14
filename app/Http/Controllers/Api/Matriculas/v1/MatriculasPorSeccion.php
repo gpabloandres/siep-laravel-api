@@ -148,16 +148,21 @@ class MatriculasPorSeccion extends Controller
     }
 
     private function doHardcode($item) {
-        // Modifica las plazas y vacantes del ciclo 2020 ==> HARCODEADA <==
+        // Modifica las plazas y vacantes del ciclo 2021 ==> HARCODEADA <==
         // Solo a secciones con division
-        if(request('ciclo')==2020 && !empty($item->division))
+        if(request('ciclo')==2021 && !empty($item->division))
         {
             switch ($item->nivel_servicio)
             {
                 case 'Común - Inicial':
+                    // Plazas período Octubre-Diciembre
+                    $item->plazas = 20;
+                break;
                 case 'Común - Primario':
+                    // Plazas período Octubre-Diciembre
+                    $item->plazas = 22;
                     // Plazas por defecto
-                    $item->plazas = 24;
+                    //$item->plazas = 24;
 
                     // CENTRO_ID: 3   --> JARDIN DE INFANTES Nº 2 - EL BARQUITO TRAVIESO
                     // CURSO_ID: 2492  --> Sala de 4 años VIOLETA Mañana
