@@ -157,6 +157,9 @@ class MatriculasPorSeccion extends Controller
                 case 'Común - Inicial':
                     // Plazas período Octubre-Diciembre
                     $item->plazas = 20;
+                    // Recuento de vacantes
+                    $item->vacantes= $item->plazas - $item->matriculas;
+                        
                 break;
                 case 'Común - Primario':
                     // Plazas período Octubre-Diciembre
