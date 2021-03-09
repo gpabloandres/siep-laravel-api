@@ -29,7 +29,7 @@
             </td>
             <td>
                 <h2 style="text-align: right">INSCRIPCIÓN NÚMERO | {{ $inscripcion->legajo_nro }}</h2>
-                <div style="text-align: right; font-size: 12px">“2020 - Año del General Manuel Belgrano”</div>
+                <div style="text-align: right; font-size: 12px">“2021 - Año del Trigésimo Aniversario de la Constitución Provincial”</div>
             </td>
         </tr>
     </table>
